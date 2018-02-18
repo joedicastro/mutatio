@@ -81,7 +81,7 @@
     @daily python3 ~/path/to/the/script/mutatio.py -nmqs
     #+END_SRC
 
-  And if you use a notification daemon as =dunst=, like me, you can even easily
+  And if you use a notification daemon as [[https://dunst-project.org/][dunst]], like me, you can even easily
   open the URL at the bottom in your browser if you want to view the original
   HTML document.
 
@@ -125,8 +125,8 @@
    As you probably know, upgrade your machine from the new downloaded snapshot
    is fairly easy:
 
-   - copy the ramdisk file `bsd.rd` from the upgrade snapshot folder to your root
-     directory `/`
+   - copy the ramdisk file =bsd.rd= from the upgrade snapshot folder to your root
+     directory =/=
    - boot from that ramdisk file (as simple as type =bsd.rd= in the boot prompt)
    - choose the disk and your snapshot directory as source for you snapshot sets
 
@@ -135,11 +135,11 @@
    If you want to upgrade your downloaded snapshots in an automatic way, I
    suggest you to use [[https://bitbucket.org/semarie/upobsd/src][upobsd]] by [[https://github.com/semarie][Sebastien Marie]]. This script uses a clever
    trick, that is not [[https://marc.info/?l=openbsd-misc&m=148433530525961&w=2][officially supported/documented]], to add the
-   =auto_upgrade.conf= file to the `bsd.rd` ramdisk file. Since I developed this
+   =auto_upgrade.conf= file to the =bsd.rd= ramdisk file. Since I developed this
    script to be initially running in my local machines, there is little
    advantage above the interactive way in this scenario, it only probably would
    save you a few keystrokes and probably no much time. There are, of course,
-   other scenarios where automation fits better and where `upobsd` it's an
+   other scenarios where automation fits better and where *upobsd* it's an
    excellent alternative.
 
 * Authors
