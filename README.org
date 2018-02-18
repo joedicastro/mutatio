@@ -1,0 +1,152 @@
+
+[[file:logo/logo.png]]
+
+#+BEGIN_QUOTE
+*Mutatio:*
+
+/From the Latin, mutare, meaning change, alteration, mutation./
+#+END_QUOTE
+
+* mutatio
+
+  The purpose of this script is to be an all-in-one solution to help me keep up
+  to date with the "official" OpenBSD's updates. Thus, this is the result of an
+  "eat your own food dog" effort, because no other solution out there satisfied
+  me enough to save me from the effort to write it.
+
+  Basically it checks periodically/on-demand the differences between a saved
+  version and the current one of a given document/file. It's initially intended
+  to be used as a combination of cron jobs to check each and only what interests
+  you as frequently as it fits you. For instance, you could look for a new
+  available snapshot if you are following =-current= every two hours but only
+  check for updates from the Hackathons web page weekly.
+
+  Once a update is detected you can get the feedback trough three different ways:
+  the command line output, a local mail or a desktop notification. This is
+  completely optional and you can use none, one or all, as best suits you. I
+  usually use the local mail and desktop notification simultaneously, as the
+  first one can act as a backup to the last to read it later.
+
+  The snapshots updates option is a special case, because it not only looks for
+  a new snapshot it also downloads it, verify it and only notifies you if it is
+  intact (it's deleted in other case). As soon as you are doing upgrades from
+  these downloaded snapshots, it rotates the sets to keep always a previous and
+  a current version in case that you would need/want to manually downgrade to
+  one of them.
+
+* Usage
+
+  The script is very easy to use, and currently it supports these options (from
+  the original command line help):
+
+  #+BEGIN_SRC 
+    usage: mutatio.py [-h] [-q] [-m] [-n] [-t] [-S] [-P] [-l] [-s] [-e] [-c] [-i]
+                    [-H] [-M [MIRROR]] [-v]
+                    [path]
+
+    Look for changes in several OpenBSD topics.
+
+    positional arguments:
+    path                  The path to store the working files [default: ~/obsd]
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -q, --quiet           do not send any output to the command line
+    -m, --mail            send feedback via local mail to current user
+    -n, --notify          send feedback via popup notification (notify-send)
+    -t, --no-temp         do not use the /tmp directory/partition
+    -S, --snapshot        look for a new snapshot set for current arch
+    -P, --packages        look for a new set of packages
+    -l, --changelog       look for changes in the ChangeLog file
+    -s, --errata          look for changes in the errata web page
+    -e, --events          look for changes in the events web page
+    -c, --current         look for changes in the FAQ's current web page.
+    -i, --innovations     look for changes in the innovations web page.
+    -H, --hackathons      look for changes in the hackathons web page
+    -M [MIRROR], --mirror [MIRROR]
+                            The mirror where to get the snapshots from [default:
+                            the one from /etc/installurl]
+    -v, --version         show program's version number and exit
+  #+END_SRC 
+
+  Thus, we could get a notification like this:
+
+  [[file:img/notification.png]]
+
+  using a single cron job like this:
+
+    #+BEGIN_SRC sh
+    MAILTO=username
+    DISPLAY=:0
+    @daily python3 ~/path/to/the/script/mutatio.py -nmqs
+    #+END_SRC
+
+  And if you use a notification daemon as =dunst=, like me, you can even easily
+  open the URL at the bottom in your browser if you want to view the original
+  HTML document.
+
+** Get the last snapshot set
+
+   When you use the snapshot option (=-S, --snapshot=), then several things
+   happen:
+
+   1. If there is not any snapshot set downloaded or there is a new available,
+      then starts to download the entire snapshot set to the disk for the
+      current machine architecture. 
+   2. When the download ends, it verifies the integrity of the same, and in case
+      of there is some file that is corrupted then tries to download it again
+      once (five minutes later).
+   3. If the snapshot is intact then saves it in the right folder, upgrade or
+      current, in other case it discard and delete the entire set.
+   4. Notifies you that a new snapshot set is available to upgrade.
+   5. The next time that the script is executed, if the upgrade snapshot is
+      already installed then proceeds to rotate the snapshots folders to keep
+      always at least the current and the previous one available on the disk, in
+      case of there is any need to go back to another of them. If it is not
+      already installed keeps it until you decide to upgrade to it or a new
+      snapshot is available to replace it.
+
+   By default the new snapshot is downloaded to a temporary directory in =/tmp=,
+   but you can use the =-t= option to use the snapshots folder if you want or do
+   not have enough space in that directory/partition.
+
+   The reason why I download the entire snapshot and not only the =SHA256.sig=
+   and =bsd.rd= files is because it happened to me already two times that I
+   started to upgrade my system and several files were corrupted, having to
+   abort the upgrade in the middle. The most probably reason for that was that I
+   was unfortunate enough to get the mirror in the middle of a sync operation,
+   with a mixture of files from two different versions. In this way I only got
+   notified when a complete and sound snapshot is available to upgrade, saving
+   me time and inconveniences. Also the upgrade process from local is faster
+   than making it on-line in most cases.
+
+** Upgrading from the snapshot
+
+   As you probably know, upgrade your machine from the new downloaded snapshot
+   is fairly easy:
+
+   - copy the ramdisk file `bsd.rd` from the upgrade snapshot folder to your root
+     directory `/`
+   - boot from that ramdisk file (as simple as type =bsd.rd= in the boot prompt)
+   - choose the disk and your snapshot directory as source for you snapshot sets
+
+** Automate upgrades
+
+   If you want to upgrade your downloaded snapshots in an automatic way, I
+   suggest you to use [[https://bitbucket.org/semarie/upobsd/src][upobsd]] by [[https://github.com/semarie][Sebastien Marie]]. This script uses a clever
+   trick, that is not [[https://marc.info/?l=openbsd-misc&m=148433530525961&w=2][officially supported/documented]], to add the
+   =auto_upgrade.conf= file to the `bsd.rd` ramdisk file. Since I developed this
+   script to be initially running in my local machines, there is little
+   advantage above the interactive way in this scenario, it only probably would
+   save you a few keystrokes and probably no much time. There are, of course,
+   other scenarios where automation fits better and where `upobsd` it's an
+   excellent alternative.
+
+* Authors
+
+  mutatio was written by joe di castro | [[https://github.com/joedicastro][@joedicastro]]
+
+* License
+
+  [[https://cvsweb.openbsd.org/cgi-bin/cvsweb/src/share/misc/license.template?rev=HEAD][OpenBSD]] © joe di castro
+
