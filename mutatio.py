@@ -231,7 +231,14 @@ def verify(signify: Dict[str, str], snapshot: Path,
 
     """
     os.chdir(snapshot)
-    command = f"signify -Cp {signify['key']} -x {signify['file']} {filename}"
+    snapshot_release = list(
+        Path('.').glob('base*.tgz')
+    )[0].as_posix().rstrip('.tgz').lstrip('base')
+    signify_key = Path(
+        signify['key_dir'],
+        f"/etc/signify/openbsd-{snapshot_release}-base.pub"
+    ).as_posix()
+    command = f"signify -Cp {signify_key} -x {signify['file']} {filename}"
     status = subprocess.getstatusoutput(command)
     failed = [
         i.split(":")[0]
@@ -336,10 +343,10 @@ def main() -> None:
 
     args = arguments().parse_args()
 
-    release = os.uname().release.replace(".", "")
+    current_release = os.uname().release.replace(".", "")
     architecture = machine()
     signify = {
-        "key": f"/etc/signify/openbsd-{release}-base.pub",
+        "key_dir": f"/etc/signify/",
         "file": "SHA256.sig"
     }
 
@@ -373,7 +380,7 @@ def main() -> None:
         "events": parse.urljoin(website_url, "events.html"),
         "hackathons": parse.urljoin(website_url, "hackathons.html"),
         "innovations": parse.urljoin(website_url, "innovations.html"),
-        "errata": parse.urljoin(website_url, f"errata{release}.html"),
+        "errata": parse.urljoin(website_url, f"errata{current_release}.html"),
         "current": parse.urljoin(website_url, "faq/current.html"),
     }
 
