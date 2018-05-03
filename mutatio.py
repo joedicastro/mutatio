@@ -101,6 +101,7 @@ def arguments() -> ArgumentParser:
 
 
 def internet_is_up() -> bool:
+    """Return the internet connection availability."""
     status = subprocess.getstatusoutput('nc -z -w 1 google.com 443')[0]
     return True if status == 0 else False
 
