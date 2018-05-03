@@ -100,6 +100,11 @@ def arguments() -> ArgumentParser:
     return parser
 
 
+def internet_is_up() -> bool:
+    status = subprocess.getstatusoutput('nc -z -w 1 google.com 443')[0]
+    return True if status == 0 else False
+
+
 def get_document(url: str) -> List[str]:
     """Retrieve a document from a given URL.
 
@@ -340,6 +345,9 @@ def feedback(args: Namespace, title: str, body: str, urgency: str) -> None:
 
 def main() -> None:
     """Main section."""
+
+    if not internet_is_up():
+        sys.exit()
 
     args = arguments().parse_args()
 
